@@ -1,8 +1,8 @@
 import React from "react";
-import Form from "./components/Form";
+import EmployeeTable from "./components/EmployeeTable";
 
 function App() {
-  return <Form />;
+  return <EmployeeTable />;
 }
 
 export default App;
