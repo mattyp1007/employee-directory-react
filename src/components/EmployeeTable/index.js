@@ -6,14 +6,26 @@ class EmployeeTable extends Component {
   
   state = { employees: [] };
 
-  updateEmployees = (data) => {
-    this.setState({ employees: data });
+  initEmployees = (data) => {
+    // construct the array of objects with only the data we need
+    const finalData = data.map(employee => (
+      {
+        firstName: employee.name.first,
+        lastName: employee.name.last,
+        email: employee.email,
+        phone: employee.phone,
+        dob: employee.dob.date,
+        picture: employee.picture.large
+      }
+    ));
+    // set the state
+    this.setState({ employees: finalData });
     console.log(this.state.employees);
   }
 
   componentDidMount = () => {
     API.getEmployees()
-      .then(res => this.updateEmployees(res.data.results))
+      .then(res => this.initEmployees(res.data.results))
       .catch(err => console.log(err))
   }
 
