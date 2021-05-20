@@ -1,27 +1,26 @@
 import React, { Component } from "react";
-import axios from "axios";
 import "./style.css";
+import API from "../../utils/API"
 
 class EmployeeTable extends Component {
   
-  state = { }
+  state = { employees: [] };
+
+  updateEmployees = (data) => {
+    this.setState({ employees: data });
+    console.log(this.state.employees);
+  }
 
   componentDidMount = () => {
-    axios.get('https://randomuser.me/api/?inc=name,email,dob,phone,picture&results=50')
-      .then(function (response) {
-        
-        console.log(response);
-      })
-      .catch(function (error) {
-        // handle error
-        console.log(error);
-      })
+    API.getEmployees()
+      .then(res => this.updateEmployees(res.data.results))
+      .catch(err => console.log(err))
   }
 
   render() {
     return (
       <div>
-        {this.state.employees.map(employee => {
+        {/* {this.state.employees.map(employee => {
           <TableRow
             name={employee.name}
             email={employee.email}
@@ -29,7 +28,7 @@ class EmployeeTable extends Component {
             phone={employee.phone}
             picture={employee.picture}
           />
-        })}
+        })} */}
 
         <pre>Check console </pre>
       </div>
