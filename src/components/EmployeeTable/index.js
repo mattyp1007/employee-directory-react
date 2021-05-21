@@ -1,13 +1,13 @@
 import React, { Component } from "react";
 import "./style.css";
 import API from "../../utils/API"
+import DataHelpers from "../../utils/DataHelpers"
 
 class EmployeeTable extends Component {
   
-  state = { employees: [] };
+  state = { employees: [], query: "", filteredEmployees: [] };
 
   initEmployees = (data) => {
-    console.log(data);
     // construct the array of objects with only the data we need
     const finalData = data.map(employee => {
       const date = new Date(employee.dob.date);
@@ -26,7 +26,6 @@ class EmployeeTable extends Component {
     });
     // set the state
     this.setState({ employees: finalData });
-    console.log(this.state.employees);
   }
 
   componentDidMount = () => {
@@ -35,11 +34,48 @@ class EmployeeTable extends Component {
       .catch(err => console.log(err))
   }
 
+  handleInputChange = event => {
+    let val = event.target.value;
+    this.setState({ query: val });
+    let filtered = DataHelpers.filterEmployees(this.state.employees, val);
+    console.log("FILTER RESULT", filtered);
+    this.setState({ filteredEmployees: filtered });
+
+  }
+
+  renderEmployees() {
+    let arrayToRender;
+
+    if (this.state.query) {
+
+      arrayToRender = this.state.filteredEmployees;
+    } else {
+      arrayToRender = this.state.employees;
+    }
+
+    return (
+      arrayToRender.map(employee => (
+        <tr key={employee.id}>
+          <td><img src={employee.picture} alt={employee.firstName + " " + employee.lastName}/></td>
+          <td>{employee.firstName} {employee.lastName}</td>
+          <td>{employee.email}</td>
+          <td>{employee.phone}</td>
+          <td>{employee.dob}</td>
+        </tr>
+      ))
+    )
+  }
+
   render() {
     return (
       <div>
+        <h3>Employee Directory</h3>
+        <label>
+          Filter by first or last name:
+          <input id="filter" type="text" onChange={this.handleInputChange} value={this.state.query}></input>
+        </label>
+
         <table>
-          <caption>Employee Directory</caption>
           <thead>
             <tr>
               <th>Picture</th>
@@ -50,15 +86,7 @@ class EmployeeTable extends Component {
             </tr>
           </thead>
           <tbody>
-            {this.state.employees.map(employee => (
-              <tr key={employee.id}>
-                <td><img src={employee.picture} alt={employee.firstName + " " + employee.lastName}/></td>
-                <td>{employee.firstName} {employee.lastName}</td>
-                <td>{employee.email}</td>
-                <td>{employee.phone}</td>
-                <td>{employee.dob}</td>
-              </tr>
-            ))}
+            {this.renderEmployees()}
           </tbody>
       </table>
 
