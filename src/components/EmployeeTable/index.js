@@ -5,20 +5,28 @@ import DataHelpers from "../../utils/DataHelpers"
 
 class EmployeeTable extends Component {
   
-  state = { employees: [], query: "", filteredEmployees: [] };
+  state = { 
+    employees: [], 
+    query: "", 
+    filteredEmployees: [], 
+    currentSort: {
+      column: "",
+      order: ""
+    }
+  };
 
   initEmployees = (data) => {
     // construct the array of objects with only the data we need
     const finalData = data.map(employee => {
-      const date = new Date(employee.dob.date);
-      const formattedDate = date.toLocaleDateString();
+      // const date = new Date(employee.dob.date);
+      // const formattedDate = date.toLocaleDateString();
       return (
         {
           firstName: employee.name.first,
           lastName: employee.name.last,
           email: employee.email,
           phone: employee.phone,
-          dob: formattedDate,
+          dob: employee.dob.date,
           picture: employee.picture.large,
           id: employee.login.uuid
         }
@@ -38,9 +46,59 @@ class EmployeeTable extends Component {
     let val = event.target.value;
     this.setState({ query: val });
     let filtered = DataHelpers.filterEmployees(this.state.employees, val);
-    console.log("FILTER RESULT", filtered);
     this.setState({ filteredEmployees: filtered });
 
+  }
+
+  handleColumnClick = event => {
+    let prevSortCol = this.state.currentSort.column;
+    let prevSortOrder = this.state.currentSort.order;
+    let newOrder = "asc";
+    let sorted = [];
+
+    if(event.target.dataset.value === "Name"){
+      if(prevSortCol === "Name" && prevSortOrder === "asc"){
+        newOrder = "desc";
+      }
+
+      if(this.state.query){
+        sorted = DataHelpers.sortByName(this.state.filteredEmployees, newOrder);
+      } else {
+        sorted = DataHelpers.sortByName(this.state.employees, newOrder);
+      }
+      
+
+    } else {
+      if(prevSortCol === "DoB" && prevSortOrder === "asc"){
+        newOrder = "desc";
+      }
+
+      if(this.state.query){
+        sorted = DataHelpers.sortByDob(this.state.filteredEmployees, newOrder);
+      } else {
+        sorted = DataHelpers.sortByDob(this.state.employees, newOrder)
+      }
+    }
+    if(this.state.query){
+      this.setState({ 
+        filteredEmployees: sorted, 
+        currentSort: {
+          column: event.target.dataset.value,
+          order: newOrder
+        }
+      });
+    } else {
+      this.setState({ 
+        employees: sorted, 
+        currentSort: {
+          column: event.target.dataset.value,
+          order: newOrder
+        }
+      });
+    }
+    
+
+    
   }
 
   renderEmployees() {
@@ -60,7 +118,7 @@ class EmployeeTable extends Component {
           <td>{employee.firstName} {employee.lastName}</td>
           <td>{employee.email}</td>
           <td>{employee.phone}</td>
-          <td>{employee.dob}</td>
+          <td>{new Date(employee.dob).toLocaleDateString()}</td>
         </tr>
       ))
     )
@@ -74,15 +132,15 @@ class EmployeeTable extends Component {
           Filter by first or last name:
           <input id="filter" type="text" onChange={this.handleInputChange} value={this.state.query}></input>
         </label>
-
+        <p>Click name or date of birth column to sort</p>
         <table>
           <thead>
             <tr>
               <th>Picture</th>
-              <th>Name</th>
+              <th onClick={this.handleColumnClick} data-value="Name">Name</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Date of Birth</th>
+              <th onClick={this.handleColumnClick} data-value="DoB">Date of Birth</th>
             </tr>
           </thead>
           <tbody>
